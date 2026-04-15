@@ -1,29 +1,69 @@
-# 📚 The Bookshelf - Java + React Bookstore
+# 📚 The Bookshelf — Online Bookstore
 
-> **PHP project ko Java Spring Boot + React mein convert kiya gaya**
-> AWS pe deploy karne ke liye ready
+A full-stack bookstore web application converted from PHP to a modern **Java Spring Boot** backend and **React.js** frontend, ready for deployment on AWS.
+
+![Java](https://img.shields.io/badge/Java-17-orange?logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-green?logo=springboot)
+![React](https://img.shields.io/badge/React-18-blue?logo=react)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?logo=mysql)
+![Docker](https://img.shields.io/badge/Docker-ready-blue?logo=docker)
+![AWS](https://img.shields.io/badge/AWS-EC2%20%7C%20RDS%20%7C%20S3-orange?logo=amazonaws)
+
+---
+
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [Architecture](#-architecture)
+- [Project Structure](#-project-structure)
+- [Tech Stack](#-tech-stack)
+- [Getting Started](#-getting-started)
+- [AWS Deployment](#-aws-deployment)
+- [API Reference](#-api-reference)
+- [Default Credentials](#-default-credentials)
+- [Environment Variables](#-environment-variables)
+
+---
+
+## ✨ Features
+
+**User Side**
+- Register and login with JWT authentication
+- Browse all books on the shop page
+- Search books by name
+- Add books to cart, update quantity, remove items
+- Place orders with delivery details and payment method
+- View order history and payment status
+
+**Admin Panel**
+- Dashboard with stats (products, orders, messages, revenue)
+- Add, edit, and delete books with image upload
+- View and manage all customer orders
+- Update payment status (pending → completed)
+- View and delete customer messages
+- View all registered users
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                    AWS Cloud                         │
-│                                                      │
-│  ┌──────────────┐    HTTP/REST    ┌───────────────┐  │
-│  │   Frontend   │ ─────────────► │    Backend    │  │
-│  │  React.js    │                │  Spring Boot  │  │
-│  │  (S3 +       │ ◄───────────── │  Java 17      │  │
-│  │  CloudFront) │    JSON API    │  (EC2)        │  │
-│  └──────────────┘                └───────┬───────┘  │
-│                                          │           │
-│                                          ▼           │
-│                                  ┌───────────────┐   │
-│                                  │  AWS RDS      │   │
-│                                  │  MySQL 8.0    │   │
-│                                  └───────────────┘   │
-└─────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                        AWS Cloud                         │
+│                                                          │
+│  ┌─────────────────┐   REST API   ┌──────────────────┐  │
+│  │   Frontend      │ ──────────►  │    Backend       │  │
+│  │   React.js      │              │  Spring Boot     │  │
+│  │   S3 +          │ ◄──────────  │  Java 17         │  │
+│  │   CloudFront    │   JSON       │  EC2 Instance    │  │
+│  └─────────────────┘              └────────┬─────────┘  │
+│                                            │             │
+│                                            ▼             │
+│                                   ┌──────────────────┐   │
+│                                   │   AWS RDS        │   │
+│                                   │   MySQL 8.0      │   │
+│                                   └──────────────────┘   │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -32,236 +72,76 @@
 
 ```
 bookstore/
-├── backend/                        ← Java Spring Boot
+├── backend/                            # Java Spring Boot
 │   ├── Dockerfile
 │   ├── pom.xml
 │   └── src/main/java/com/bookstore/
 │       ├── BookstoreApplication.java
 │       ├── config/
-│       │   ├── SecurityConfig.java  (JWT + CORS)
-│       │   └── WebMvcConfig.java    (Static files)
+│       │   ├── SecurityConfig.java     # JWT + CORS configuration
+│       │   └── WebMvcConfig.java       # Static file serving
 │       ├── controller/
-│       │   ├── AuthController.java      (Login/Register)
-│       │   ├── ProductController.java   (Books CRUD)
-│       │   ├── CartController.java      (Cart)
-│       │   ├── OrderController.java     (Orders)
-│       │   ├── MessageController.java   (Contact)
-│       │   └── AdminController.java     (Users list)
-│       ├── service/         (Business logic)
-│       ├── repository/      (JPA/DB queries)
-│       ├── model/           (User, Product, Cart, Order, Message)
-│       ├── dto/             (Request/Response objects)
-│       ├── security/        (JWT Util + Filter)
-│       └── exception/       (Global error handler)
+│       │   ├── AuthController.java     # Register / Login
+│       │   ├── ProductController.java  # Books CRUD
+│       │   ├── CartController.java     # Cart management
+│       │   ├── OrderController.java    # Order placement & admin
+│       │   ├── MessageController.java  # Contact form
+│       │   └── AdminController.java    # Admin user list
+│       ├── service/                    # Business logic layer
+│       ├── repository/                 # Spring Data JPA repositories
+│       ├── model/                      # JPA entities
+│       │   ├── User.java
+│       │   ├── Product.java
+│       │   ├── Cart.java
+│       │   ├── Order.java
+│       │   └── Message.java
+│       ├── dto/                        # Request / Response objects
+│       ├── security/                   # JWT filter and utility
+│       └── exception/                  # Global exception handler
 │
-├── frontend/                       ← React.js
+├── frontend/                           # React.js
 │   ├── Dockerfile
-│   ├── nginx.conf
+│   ├── nginx.conf                      # Nginx config for SPA routing
 │   ├── package.json
 │   └── src/
-│       ├── App.js            (Routing)
+│       ├── App.js                      # Route definitions
+│       ├── App.css                     # Global styles
+│       ├── index.js
 │       ├── context/
-│       │   └── AuthContext.js  (Global auth state)
+│       │   └── AuthContext.js          # Global auth state (JWT)
 │       ├── services/
-│       │   └── api.js          (All API calls - Axios)
-│       ├── pages/
-│       │   ├── Login.js
-│       │   ├── Register.js
-│       │   ├── user/
-│       │   │   ├── Home.js
-│       │   │   ├── Shop.js
-│       │   │   ├── Cart.js
-│       │   │   ├── Checkout.js
-│       │   │   ├── Orders.js
-│       │   │   ├── About.js
-│       │   │   └── Contact.js
+│       │   └── api.js                  # All Axios API calls
+│       ├── components/
+│       │   ├── common/
+│       │   │   ├── Navbar.js
+│       │   │   ├── Footer.js
+│       │   │   └── Toast.js
 │       │   └── admin/
-│       │       ├── AdminDashboard.js
-│       │       ├── AdminProducts.js
-│       │       ├── AdminOrders.js
-│       │       ├── AdminMessages.js
-│       │       └── AdminUsers.js
-│       └── components/
-│           ├── common/
-│           │   ├── Navbar.js
-│           │   ├── Footer.js
-│           │   └── Toast.js
+│       │       └── AdminSidebar.js
+│       └── pages/
+│           ├── Login.js
+│           ├── Register.js
+│           ├── user/
+│           │   ├── Home.js
+│           │   ├── Shop.js
+│           │   ├── Cart.js
+│           │   ├── Checkout.js
+│           │   ├── Orders.js
+│           │   ├── About.js
+│           │   └── Contact.js
 │           └── admin/
-│               └── AdminSidebar.js
+│               ├── AdminDashboard.js
+│               ├── AdminProducts.js
+│               ├── AdminOrders.js
+│               ├── AdminMessages.js
+│               └── AdminUsers.js
 │
-├── docker-compose.yml          ← Local development
-├── deploy-backend-ec2.sh       ← EC2 deployment
-├── deploy-frontend-s3.sh       ← S3 deployment
-├── rds-init.sql                ← Database setup
+├── docker-compose.yml                  # Local development (all-in-one)
+├── deploy-backend-ec2.sh               # AWS EC2 deployment script
+├── deploy-frontend-s3.sh               # AWS S3 deployment script
+├── rds-init.sql                        # Database initialization script
 └── README.md
 ```
-
----
-
-## 🚀 Quick Start (Local Development)
-
-### Option A: Docker Compose (Sabse Aasaan)
-```bash
-# 1. Project clone/copy karo
-cd bookstore
-
-# 2. Ek command mein sab start karo
-docker-compose up --build
-
-# App ready ho jayega:
-# Frontend: http://localhost:3000
-# Backend:  http://localhost:8080
-# Database: localhost:3306
-```
-
-### Option B: Manual (Without Docker)
-
-**Backend:**
-```bash
-cd backend
-
-# MySQL locally run karo aur .env set karo
-export DB_HOST=localhost
-export DB_USERNAME=root
-export DB_PASSWORD=yourpassword
-export DB_NAME=books
-export JWT_SECRET=your-256-bit-secret-key-here
-
-mvn spring-boot:run
-# Backend: http://localhost:8080
-```
-
-**Frontend:**
-```bash
-cd frontend
-npm install
-
-# .env mein backend URL set karo
-echo "REACT_APP_API_URL=http://localhost:8080/api" > .env
-
-npm start
-# Frontend: http://localhost:3000
-```
-
----
-
-## ☁️ AWS Deployment (Step-by-Step)
-
-### Step 1: RDS MySQL Setup
-1. AWS Console → RDS → Create Database
-2. Engine: **MySQL 8.0**
-3. Template: Free Tier
-4. DB name: `books`
-5. Username: `admin`, Password: (strong password)
-6. VPC: Same as EC2
-7. **Public access: No**
-8. Security Group: EC2 se port **3306** allow karo
-
-9. RDS create hone ke baad **Endpoint** copy karo
-   ```
-   bookstore-db.xxxxx.ap-south-1.rds.amazonaws.com
-   ```
-
-10. MySQL client se connect karke init script run karo:
-    ```bash
-    mysql -h YOUR_RDS_ENDPOINT -u admin -p < rds-init.sql
-    ```
-
----
-
-### Step 2: EC2 Backend Deploy
-
-1. EC2 launch karo: **Ubuntu 22.04, t3.micro**
-2. Security Group mein **port 8080** open karo (Inbound)
-3. EC2 mein SSH karo:
-   ```bash
-   ssh -i your-key.pem ubuntu@YOUR_EC2_IP
-   ```
-
-4. Backend code upload karo:
-   ```bash
-   scp -r -i your-key.pem backend/ ubuntu@YOUR_EC2_IP:~/bookstore/
-   ```
-
-5. Deploy script run karo:
-   ```bash
-   chmod +x deploy-backend-ec2.sh
-   ./deploy-backend-ec2.sh
-   ```
-
-6. `.env` mein RDS details daalo:
-   ```bash
-   sudo nano /opt/bookstore/.env
-   ```
-   ```
-   DB_HOST=YOUR_RDS_ENDPOINT
-   DB_PASSWORD=YOUR_RDS_PASSWORD
-   JWT_SECRET=your-very-strong-secret
-   FRONTEND_URL=https://your-cloudfront-url.cloudfront.net
-   ```
-
-7. Service restart karo:
-   ```bash
-   sudo systemctl restart bookstore
-   sudo systemctl status bookstore
-   ```
-
----
-
-### Step 3: S3 Frontend Deploy
-
-1. `deploy-frontend-s3.sh` mein apni values daalo:
-   ```bash
-   S3_BUCKET="bookstore-frontend-yourname"
-   BACKEND_URL="http://YOUR_EC2_IP:8080/api"
-   ```
-
-2. Script run karo:
-   ```bash
-   chmod +x deploy-frontend-s3.sh
-   ./deploy-frontend-s3.sh
-   ```
-
-3. (Optional) CloudFront setup karo HTTPS ke liye:
-   - AWS Console → CloudFront → Create Distribution
-   - Origin: S3 website URL
-   - Redirect HTTP → HTTPS
-   - Custom error: 404 → /index.html (200)
-
----
-
-## 🔑 API Endpoints
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | `/api/auth/register` | Public | Register |
-| POST | `/api/auth/login` | Public | Login |
-| GET | `/api/products` | Public | All products |
-| GET | `/api/products/featured` | Public | 6 products |
-| POST | `/api/admin/products` | Admin | Add product |
-| PUT | `/api/admin/products/{id}` | Admin | Update product |
-| DELETE | `/api/admin/products/{id}` | Admin | Delete product |
-| GET | `/api/cart` | User | Get cart |
-| POST | `/api/cart` | User | Add to cart |
-| PUT | `/api/cart/{id}` | User | Update qty |
-| DELETE | `/api/cart/{id}` | User | Remove item |
-| DELETE | `/api/cart` | User | Clear cart |
-| GET | `/api/orders` | User | My orders |
-| POST | `/api/orders` | User | Place order |
-| GET | `/api/admin/orders` | Admin | All orders |
-| PUT | `/api/admin/orders/{id}/status` | Admin | Update status |
-| POST | `/api/messages` | User | Send message |
-| GET | `/api/admin/messages` | Admin | All messages |
-| GET | `/api/admin/users` | Admin | All users |
-
----
-
-## 🔒 Default Admin Login
-```
-Email:    admin@bookstore.com
-Password: admin123
-```
-> ⚠️ **Production mein password zaroor change karo!**
 
 ---
 
@@ -269,12 +149,303 @@ Password: admin123
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Java 17, Spring Boot 3.2 |
-| Security | Spring Security + JWT |
-| Database | MySQL 8 (AWS RDS) |
+| Backend Language | Java 17 |
+| Backend Framework | Spring Boot 3.2 |
+| Authentication | Spring Security + JWT (jjwt 0.11) |
+| Database ORM | Spring Data JPA / Hibernate |
+| Database | MySQL 8.0 |
+| Password Hashing | BCrypt |
 | Frontend | React 18, React Router v6 |
 | HTTP Client | Axios |
-| Styling | Custom CSS (original se inspired) |
-| Backend Deploy | AWS EC2 |
-| Frontend Deploy | AWS S3 + CloudFront |
-| Containerization | Docker + Docker Compose |
+| Frontend Server | Nginx (Alpine) |
+| Containerization | Docker, Docker Compose |
+| Cloud — Backend | AWS EC2 |
+| Cloud — Frontend | AWS S3 + CloudFront |
+| Cloud — Database | AWS RDS (MySQL) |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+- Git
+
+### Run Locally with Docker Compose
+
+This is the easiest way to run the entire project with a single command.
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/bookstore.git
+cd bookstore
+
+# 2. Start all services (backend + frontend + MySQL)
+docker compose up --build
+```
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:8080/api |
+| MySQL | localhost:3306 |
+
+### Run Without Docker
+
+**Backend**
+
+```bash
+cd backend
+
+# Set environment variables
+export DB_HOST=localhost
+export DB_PORT=3306
+export DB_NAME=books
+export DB_USERNAME=root
+export DB_PASSWORD=your_password
+export JWT_SECRET=your-256-bit-secret-key
+export FRONTEND_URL=http://localhost:3000
+
+# Run
+mvn spring-boot:run
+```
+
+**Frontend**
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Set backend URL
+echo "REACT_APP_API_URL=http://localhost:8080/api" > .env
+
+# Start development server
+npm start
+```
+
+---
+
+## ☁️ AWS Deployment
+
+### Step 1 — Set Up AWS RDS (MySQL)
+
+1. Go to **AWS Console → RDS → Create Database**
+2. Settings:
+   - Engine: **MySQL 8.0**
+   - Template: Free Tier
+   - DB instance identifier: `bookstore-db`
+   - Master username: `admin`
+   - Master password: *(choose a strong password)*
+   - Initial database name: `books`
+   - VPC: Same as your EC2 instance
+   - Public access: **No**
+3. After creation, note the **Endpoint URL**:
+   ```
+   bookstore-db.xxxxxxxx.ap-south-1.rds.amazonaws.com
+   ```
+4. Connect and initialize the database:
+   ```bash
+   mysql -h YOUR_RDS_ENDPOINT -u admin -p < rds-init.sql
+   ```
+
+---
+
+### Step 2 — Deploy Backend to EC2
+
+1. Launch an EC2 instance: **Ubuntu 22.04 LTS, t3.micro**
+2. In the Security Group, open **port 8080** (inbound, TCP)
+3. Copy the backend code to EC2:
+   ```bash
+   scp -r -i your-key.pem backend/ ubuntu@YOUR_EC2_IP:~/bookstore/
+   scp -i your-key.pem deploy-backend-ec2.sh ubuntu@YOUR_EC2_IP:~/
+   ```
+4. SSH into the instance and run the deploy script:
+   ```bash
+   ssh -i your-key.pem ubuntu@YOUR_EC2_IP
+   chmod +x deploy-backend-ec2.sh
+   ./deploy-backend-ec2.sh
+   ```
+5. Update the environment file with your RDS details:
+   ```bash
+   sudo nano /opt/bookstore/.env
+   ```
+   ```env
+   DB_HOST=YOUR_RDS_ENDPOINT
+   DB_PASSWORD=YOUR_RDS_PASSWORD
+   JWT_SECRET=your-very-strong-256-bit-secret
+   FRONTEND_URL=https://your-cloudfront-url.cloudfront.net
+   ```
+6. Restart the service:
+   ```bash
+   sudo systemctl restart bookstore
+   sudo systemctl status bookstore
+   ```
+
+---
+
+### Step 3 — Deploy Frontend to S3
+
+1. Edit `deploy-frontend-s3.sh` and set your values:
+   ```bash
+   S3_BUCKET="bookstore-frontend-yourname"
+   AWS_REGION="ap-south-1"
+   BACKEND_URL="http://YOUR_EC2_PUBLIC_IP:8080/api"
+   ```
+2. Run the script:
+   ```bash
+   chmod +x deploy-frontend-s3.sh
+   ./deploy-frontend-s3.sh
+   ```
+3. *(Optional)* Set up **CloudFront** for HTTPS:
+   - Go to **AWS Console → CloudFront → Create Distribution**
+   - Origin: your S3 website URL
+   - Viewer Protocol Policy: **Redirect HTTP to HTTPS**
+   - Custom error response: `404` → `/index.html` (HTTP 200)
+
+---
+
+## 📡 API Reference
+
+### Authentication
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `POST` | `/api/auth/register` | Public | Register a new user |
+| `POST` | `/api/auth/login` | Public | Login and receive JWT token |
+
+### Products
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/api/products` | Public | Get all products |
+| `GET` | `/api/products/featured` | Public | Get 6 featured products |
+| `POST` | `/api/admin/products` | Admin | Add a new product (multipart) |
+| `PUT` | `/api/admin/products/{id}` | Admin | Update a product |
+| `DELETE` | `/api/admin/products/{id}` | Admin | Delete a product |
+
+### Cart
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/api/cart` | User | Get current user's cart |
+| `POST` | `/api/cart` | User | Add item to cart |
+| `PUT` | `/api/cart/{id}` | User | Update item quantity |
+| `DELETE` | `/api/cart/{id}` | User | Remove a single item |
+| `DELETE` | `/api/cart` | User | Clear entire cart |
+
+### Orders
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/api/orders` | User | Get current user's orders |
+| `POST` | `/api/orders` | User | Place a new order |
+| `GET` | `/api/admin/orders` | Admin | Get all orders |
+| `PUT` | `/api/admin/orders/{id}/status` | Admin | Update payment status |
+| `DELETE` | `/api/admin/orders/{id}` | Admin | Delete an order |
+
+### Messages
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `POST` | `/api/messages` | User | Send a contact message |
+| `GET` | `/api/admin/messages` | Admin | Get all messages |
+| `DELETE` | `/api/admin/messages/{id}` | Admin | Delete a message |
+
+### Admin
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/api/admin/users` | Admin | Get all registered users |
+
+---
+
+## 🔑 Default Credentials
+
+After running `rds-init.sql`, a default admin account is created:
+
+| Field | Value |
+|-------|-------|
+| Email | `admin@bookstore.com` |
+| Password | `admin123` |
+| Role | Admin |
+
+> ⚠️ **Change the default admin password immediately after first login in a production environment.**
+
+---
+
+## 🔧 Environment Variables
+
+### Backend (`/opt/bookstore/.env` on EC2)
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DB_HOST` | RDS MySQL endpoint | `localhost` |
+| `DB_PORT` | MySQL port | `3306` |
+| `DB_NAME` | Database name | `books` |
+| `DB_USERNAME` | Database user | `root` |
+| `DB_PASSWORD` | Database password | *(empty)* |
+| `JWT_SECRET` | Secret key for signing JWTs (min 256-bit) | — |
+| `JWT_EXPIRATION` | Token expiry in milliseconds | `86400000` (24h) |
+| `FRONTEND_URL` | Allowed CORS origin | `http://localhost:3000` |
+| `UPLOAD_DIR` | Directory for uploaded images | `./uploads` |
+| `PORT` | Server port | `8080` |
+
+### Frontend (`.env` file)
+
+| Variable | Description |
+|----------|-------------|
+| `REACT_APP_API_URL` | Backend API base URL |
+
+---
+
+## 🗄️ Database Schema
+
+```sql
+register    -- Users (id, name, email, password, user_type)
+products    -- Books (id, name, price, image)
+cart        -- Cart items (id, user_id, name, price, quantity, image)
+orders      -- Orders (id, user_id, name, number, email, method,
+            --         address, total_products, total_price,
+            --         placed_on, payment_status)
+message     -- Contact messages (id, user_id, name, email, number, message)
+```
+
+---
+
+## 🐳 Docker Commands
+
+```bash
+# Start all services
+docker compose up --build
+
+# Start in background
+docker compose up -d --build
+
+# Stop all services
+docker compose down
+
+# View logs
+docker compose logs -f backend
+docker compose logs -f frontend
+
+# Restart a single service
+docker compose restart backend
+
+# Remove volumes (reset database)
+docker compose down -v
+```
+
+---
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+---
+
+## 🤝 Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
